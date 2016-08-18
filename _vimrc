@@ -1,44 +1,136 @@
-execute pathogen#infect()
+set modelines=1
 
+" Language {{{
 set langmenu=en_US
 let $LANG = 'en_US'
-colo slate
+"}}}
+
+"Appearance {{{
+colorscheme slate
+
 set number
 
 set cursorline
-autocmd ColorScheme * highlight LineNr ctermfg=red ctermbg=black guibg=black guifg=orange
+autocmd ColorScheme * highlight LineNr ctermfg=DarkYellow ctermbg=black guibg=black guifg=#ffae00
 autocmd ColorScheme * highlight CursorLineNr ctermfg=green ctermbg=black guibg=black guifg=green cterm=bold
 autocmd ColorScheme * highlight CursorLine cterm=NONE ctermbg=NONE ctermfg=NONE guibg=NONE guifg=NONE
 
+silent! set winheight=35
+silent! set winminheight=5
+silent! set winwidth=40
+silent! set winminwidth=10
+"}}}
+
+"Shortcut keys {{{
+
+let mapleader=","       " leader is comma
+
+nnoremap <leader>ev :vsp $MYVIMRC<CR>  
+nnoremap <leader>sv :source $MYVIMRC<CR>
+nnoremap <leader><space> :nohlsearch<CR>
+nnoremap <space> za
+" highlight last inserted text
+nnoremap gV `[v`]
+" toggle gundo
+nnoremap <leader>u :GundoToggle<CR>
+" save session
+nnoremap <leader>s :mksession<CR>
+" open ag.vim
+nnoremap <leader>a :Ag
+
+
+" || (double click console) is escape
+"imap || <esc>
+
+"}}}
+
+"Autocommands {{{
+autocmd vimenter * NERDTree
+autocmd! BufNewFile,BufRead *.pde setlocal ft=arduino
+autocmd BufEnter * let &titlestring = ' ' . expand("%:t")
+
+augroup configgroup "language-specific settings
+    autocmd!
+    autocmd VimEnter * highlight clear SignColumn
+    autocmd BufWritePre *.php,*.py,*.js,*.txt,*.hs,*.java,*.md
+                \:call <SID>StripTrailingWhitespaces()
+    autocmd FileType java setlocal noexpandtab
+    autocmd FileType java setlocal list
+    autocmd FileType java setlocal listchars=tab:+\ ,eol:-
+    autocmd FileType java setlocal formatprg=par\ -w80\ -T4
+    autocmd FileType php setlocal expandtab
+    autocmd FileType php setlocal list
+    autocmd FileType php setlocal listchars=tab:+\ ,eol:-
+    autocmd FileType php setlocal formatprg=par\ -w80\ -T4
+    autocmd FileType ruby setlocal tabstop=2
+    autocmd FileType ruby setlocal shiftwidth=2
+    autocmd FileType ruby setlocal softtabstop=2
+    autocmd FileType ruby setlocal commentstring=#\ %s
+    autocmd FileType python setlocal commentstring=#\ %s
+    autocmd BufEnter *.cls setlocal filetype=java
+    autocmd BufEnter *.zsh-theme setlocal filetype=zsh
+    autocmd BufEnter Makefile setlocal noexpandtab
+    autocmd BufEnter *.sh setlocal tabstop=2
+    autocmd BufEnter *.sh setlocal shiftwidth=2
+    autocmd BufEnter *.sh setlocal softtabstop=2
+augroup END
+
+"}}}
+
+"System things, sets{{{
 set nocompatible
 source $VIMRUNTIME/vimrc_example.vim
 source $VIMRUNTIME/mswin.vim
 behave mswin
 
-autocmd vimenter * NERDTree
-autocmd! BufNewFile,BufRead *.pde setlocal ft=arduino
+"enable syntax
 
-    set runtimepath^=~/.vim/bundle/ctrlp.vim
+set tabstop=4
+set softtabstop=4
+set expandtab
 
-    set statusline+=%#warningmsg#
-    set statusline+=%{SyntasticStatuslineFlag()}
-    set statusline+=%*
+"set showcmd
 
-    let g:syntastic_always_populate_loc_list = 1
-    let g:syntastic_auto_loc_list = 1
-    let g:syntastic_check_on_open = 1
-    let g:syntastic_check_on_wq = 0
+filetype indent on
+set wildmenu
+"set lazydraw
+set incsearch
+set hlsearch
 
-    silent! set winheight=35
-    silent! set winminheight=5
-    silent! set winwidth=40
-    silent! set winminwidth=10
+set foldenable
+set foldlevelstart=10
+set foldnestmax=10
 
-    autocmd BufEnter * let &titlestring = ' ' . expand("%:t")             
-    set title
+" CtrlP settings
+let g:ctrlp_match_window = 'bottom,order:ttb'
+let g:ctrlp_switch_buffer = 0
+let g:ctrlp_working_path_mode = 0
+let g:ctrlp_user_command = 'ag %s -l --nocolor --hidden -g ""'
+
+set runtimepath^=~/.vim/bundle/ctrlp.vim
+
+"Syntastic recommended settings
+"set statusline+=%#warningmsg#
+"set statusline+=%{SyntasticStatuslineFlag()}
+"set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+
+"remove 'thanks for flying vim'
+let &titlestring = $USER . "@" . hostname() . " " . expand("%:p")
+if &term == "screen"
+  set t_ts=^[k
+  set t_fs=^[\
+endif
+if &term == "screen" || &term == "xterm"
+  set title
+endif
 
 set diffexpr=MyDiff()
-function MyDiff()
+function! MyDiff()
   let opt = '-a --binary '
   if &diffopt =~ 'icase' | let opt = opt . '-i ' | endif
   if &diffopt =~ 'iwhite' | let opt = opt . '-b ' | endif
@@ -66,13 +158,34 @@ function MyDiff()
     let &shellxquote=l:shxq_sav
   endif
 endfunction
+"}}}
 
+"Plugins {{{
 call plug#begin('~/.vim/plugged')
 
 " Make sure you use single quotes
 
-"Sensible
-Plug 'tpope/vim-sensible'
+"The silver searcher (ag)
+Plug 'https://github.com/ggreer/the_silver_searcher'
+
+"Gundo, visualize undo (u) tree
+Plug 'https://github.com/sjl/gundo.vim'
+
+"Solarized colorscheme
+Plug 'https://github.com/altercation/Vim-colors-solarized'
+
+"Badwolf colorscheme
+Plug 'https://github.com/sjl/badwolf/'
+
+"Live preview for html, css, js
+"add this to the page(S): <script src='http://127.0.0.1:9001/js/socket.js'></script>
+Plug 'https://github.com/jaxbot/browserlink.vim'
+
+"Airline, status/tabline
+Plug 'https://github.com/vim-airline/vim-airline'
+
+"Sensible, disabled for now
+"Plug 'tpope/vim-sensible'
 
 "Arduino syntax
 Plug 'https://github.com/vim-scripts/Arduino-syntax-file'
@@ -125,4 +238,7 @@ Plug '~/my-prototype-plugin'
 
 " Add plugins to &runtimepath
 call plug#end()
+"}}}
 
+
+" vim:foldmethod=marker:foldlevel=0
