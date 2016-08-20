@@ -15,6 +15,9 @@ autocmd ColorScheme * highlight LineNr ctermfg=DarkYellow ctermbg=black guibg=bl
 autocmd ColorScheme * highlight CursorLineNr ctermfg=green ctermbg=black guibg=black guifg=green cterm=bold
 autocmd ColorScheme * highlight CursorLine cterm=NONE ctermbg=NONE ctermfg=NONE guibg=NONE guifg=NONE
 
+"You complete me menu
+highlight Pmenu ctermfg=2 ctermbg=3 guifg=#ffae00 guibg=#000000
+
 silent! set winheight=35
 silent! set winminheight=5
 silent! set winwidth=40
